@@ -63,9 +63,11 @@ import {useRouter} from "vue-router";
 
   function register(ev){
     ev.preventDefault();
-    store.dispatch('register', user).then((res)=>{router.push({
+    store.dispatch('register', user).then((res)=>{
+      router.push({
       name: 'Dashboard'
-    })})
+    }
+    )})
     
   }
 </script>

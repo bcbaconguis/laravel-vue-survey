@@ -76,6 +76,10 @@
 
         </div>
 
+        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+            
+        </div>
+
 
         </div>
 
@@ -103,7 +107,7 @@ let model = ref({
 });
 
 if (route.params.id){
-    mode.value = store.state.surveys.find(
+    model.value = store.state.surveys.find(
         (s) => s.id === parseInt(route.params.id)
 
     );

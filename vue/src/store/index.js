@@ -185,6 +185,7 @@ const store = createStore({
         },
 
     surveys: tmpSurveys,
+    questionTypes: ["text", "select", "radio", "checkbox", "textarea"],
 
     },
     getters: {},

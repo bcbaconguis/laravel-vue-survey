@@ -153,10 +153,9 @@ function setOptions(options){
 
 function addOption(){
         setOptions([
-            getOptions(),
-            { uuid: uuidv4(), text: "" },
-        ]);
-    dataChange();
+            ...getOptions(),
+            { uuid: uuidv4(), text: ""},
+        ])
 }
 
 function removeOption(op){
@@ -179,6 +178,14 @@ function dataChange(){
     }
 
     emit("change", data);
+}
+
+function addQuestion(){
+    emit("addQuestion", props.index +1);
+}
+
+function deleteQuestion(){
+    emit("deleteQuestion", props.question);
 }
 
 

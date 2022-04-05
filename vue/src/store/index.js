@@ -26,7 +26,7 @@ const tmpSurveys = [
                     {uuid: "b7ba28b1-c143-44b9-9249-5354468496fd", text: "India"},
                     {uuid: "7cfe4942-6045-4b18-9fa7-1f60e26cdba7", text: "United Kingdom"},
 
-                    
+
                 ],
             },
         },
@@ -43,11 +43,11 @@ const tmpSurveys = [
                     {uuid: "b2ca6d62-5df4-4866-9406-0e7624e6137e", text: "HTML + CSS"},
                     {uuid: "519a0472-f0a9-4137-bc28-f2e7dafdb40b", text: "All of the above"},
 
-                    
+
                 ],
             },
 
-            
+
         },
 
 
@@ -63,11 +63,11 @@ const tmpSurveys = [
                     {uuid: "a37a62b5-2941-4673-af78-e0fc0e2881ff", text: "Symfony"},
                     {uuid: "16db33d0-1db6-422a-8153-2f55770837b1", text: "All of the above"},
 
-                    
+
                 ],
             },
 
-            
+
         },
 
 
@@ -83,11 +83,11 @@ const tmpSurveys = [
                     {uuid: "d2c628e8-c520-414d-8872-652705e961a3", text: "Laravel 7"},
                     {uuid: "aac3a6a8-50ed-4a35-ba62-eeaeee3d650a", text: "Laravel 8"},
 
-                    
+
                 ],
             },
 
-            
+
         },
 
         {
@@ -102,11 +102,11 @@ const tmpSurveys = [
                     {uuid: "6446b863-758e-4568-94f3-230826be26cf", text: "Real Estate"},
                     {uuid: "4a5679e1-6749-4fe1-9837-93aaf217167f", text: "All of the above"},
 
-                    
+
                 ],
             },
 
-            
+
         },
 
 
@@ -117,7 +117,7 @@ const tmpSurveys = [
             description: null,
             data: {},
 
-            
+
         },
 
         {
@@ -127,7 +127,7 @@ const tmpSurveys = [
             description: "Write your honest opinion. Everything is anonymous.",
             data: {},
 
-            
+
         },
     ],
 
@@ -158,9 +158,9 @@ const tmpSurveys = [
             updated_at: "2021-12-20 18:00:00",
             expire_date: "2021-12-20 18:00:00",
             questions: [],
-        },  
+        },
 
-        
+
     {
         id: 400,
             title: "Tailwind 3",
@@ -172,18 +172,21 @@ const tmpSurveys = [
             updated_at: "2021-12-20 18:00:00",
             expire_date: "2021-12-20 18:00:00",
             questions: [],
-        },  
+        },
 
 ];
 
 const store = createStore({
     state: {
-    
+
     user:{
         data: {},
         token: sessionStorage.getItem('TOKEN'),
         },
-
+    currentSurvey: {
+      loading: false,
+      data: {}
+    },
     surveys: tmpSurveys,
     questionTypes: ["text", "select", "radio", "checkbox", "textarea"],
 
@@ -191,25 +194,42 @@ const store = createStore({
     getters: {},
     actions: {
 
+        getSurvey({commit}, id){
+          commit("setCurrentSurveyLoading", true);
+          return axiosClient
+          .get(`/survey/${id}`)
+          .then((res) => {
+            commit("setCurrentSurvey", res.data);
+            commit("setCurrentSurveyLoading", false);
+            return res;
+          })
+          .catch((err) => {
+            commit("setCurrentSurveyLoading", false);
+            throw err;
+          })
+        },
 
         // Save Survey
 
         saveSurvey({ commit }, survey) {
+            delete survey.image_url;
             let response;
             if(survey.id){
                 response = axiosClient
                 .put(`/survey/${survey.id}`, survey)
                 .then((res) => {
-                    commit("updateSurvey", res.data);
+                    commit("setCurrentSurvey", res.data);
                     return res;
                 });
 
             }else{
                 response = axiosClient.post("/survey", survey).then((res) => {
-                    commit("saveSurvey", res.data);
+                    commit("setCurrentSurvey", res.data);
                     return res;
                 });
             }
+
+            return response;
 
         },
         // Ends here
@@ -249,22 +269,17 @@ const store = createStore({
 
         // Survey Section
 
-        saveSurvey: (state, survey) => {
-            state.surveys = [...state.surveys, survey.data];
+        setCurrentSurveyLoading: (state, loading) => {
+          state.currentSurvey.loading = loading;
+        },
+        setCurrentSurvey: (state, survey) => {
+          state.currentSurvey.data = survey.data;
         },
 
-        updateSurvey: (state, survey) => {
-            state.surveys = state.surveys.map((s) => {
-                if (s.id == survey.data.id) {
-                    return survey.data;
-                }
-                return s;
-            });
-        },
-
-        logout: state=>{
+        logout: (state)=>{
             state.user.data = {},
             state.user.token = null;
+            sessionStorage.removeItem('TOKEN');
         },
 
         setUser: (state, userData) => {

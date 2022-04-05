@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Requests;
-
+use App\Models\Survey;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreSurveyRequest extends FormRequest
@@ -17,7 +17,10 @@ class StoreSurveyRequest extends FormRequest
     }
 
     protected function prepareForValidation(){
-        $this->merge(['user_id' => $this->user()->id]);
+        $this->merge([
+            'user_id' => $this->user()->id
+        ]);
+
     }
 
     /**
@@ -29,10 +32,11 @@ class StoreSurveyRequest extends FormRequest
     {
         return [
             'title' => 'required|string|max:1000',
-            'user_id' => 'exists|user,id',
+            'image' => 'nullable|string',
+            'user_id' => 'exists:users,id',
             'status' => 'required|boolean',
             'description' => 'nullable|string',
-            'expire_date' => 'nullable|date|after:tomorrow',
+            'expire_date' => 'nullable|date|after:tomorrow'
             //
         ];
     }

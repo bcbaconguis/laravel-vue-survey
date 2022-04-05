@@ -3,14 +3,18 @@
         <template v-slot:header>
             <div class="flex items-center justify-between">
                 <h1 class="text-3x1 font-bold text-gray-900">
-                    {{ model.id ? model.title : "Create a Survey"}}
+                    {{ route.params.id ? model.title : "Create a Survey"}}
                 </h1>
+
+                <button v-if="route.params.id" type="button" class="py-2 px-3 text-white bg-red-500 rounded-md hover:bg-red-400">Delete</button>
             </div>
         </template>
 <pre>
 </pre>
 
-    <form @submit.prevent="saveSurvey">
+    <div v-if="surveyLoading" class="flex justify-center">Loading...</div>
+
+    <form v-else @submit.prevent="saveSurvey">
         <div class="shadow sm:rounded-md sm:overflow-hidden">
         <!-- Survey Fields -->
             <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
@@ -21,27 +25,27 @@
                 </label>
 
                 <div class="mt-1 flex items-center">
-                    <img v-if="model.image" :src="model.image" :alt="model.title" class="w-64 h-48 object-cover" />
+                    <img v-if="model.image_url" :src="model.image_url" :alt="model.title" class="w-64 h-48 object-cover" />
                     <span v-else class="flex items-center justify-center h-12 w-12 rounded-full overflow-hidden bg-gray-100">
 
                            <svg xmlns="http://www.w3.org/2000/svg" class="h-[80%] w-[80%] text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg> 
+                            </svg>
 
                     </span>
 
-                    
+
                     <button type="button" class="relative overflow-hidden ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray50
-                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"> <input type="file" class="absolute left-0 top-o right-0 bottom-0 opacity-0 cursor-pointer" /> Change </button>
+                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"> <input type="file" @change="onImageChoose" class="absolute left-0 top-o right-0 bottom-0 opacity-0 cursor-pointer" /> Change </button>
                 </div>
             </div>
         <!-- /Image -->
 
         <!-- Title -->
-        <div>  
+        <div>
         <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
          <input type="text" name="title" id="title" v-model="model.title" autocomplete="survey_title" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
-         
+
         </div>
         <!-- /Title   -->
 
@@ -71,16 +75,16 @@
             </div>
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
             <h3 class="text-2xl font-semibold flex items-center justify-between">
-                
+
                 Questions
 
                 <button type="button" @click="addQuestion()" class="flex items-center text-sm py-1 px-4 rounded-sm text-white bg-gray-600 hover:bg-gray-700">
 
-                    
+
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-               
+
                 Add Question
                 </button>
 
@@ -105,7 +109,7 @@
 
         </div>
 
-        
+
 
         </div>
 
@@ -117,7 +121,7 @@
 <script setup>
 import store from "../store";
 import { v4 as uuidv4 } from "uuid";
-import { ref } from "vue";
+import { ref, watch, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import PageComponent from "../components/PageComponent.vue";
@@ -126,22 +130,46 @@ import QuestionEditor from "../components/editor/QuestionEditor.vue"
 const route = useRoute();
 const router = useRouter();
 
+const surveyLoading = computed(() => store.state.currentSurvey.loading)
+
 //Create empty Survey
-let model = ref({   
+let model = ref({
     title: "",
     status: false,
     description: null,
-    image: null,
+    image_url: null,
     expire_date: null,
     questions: [],
 });
 
+// Watch to current survey data change when this happens we update Local model variable
+watch(
+() => store.state.currentSurvey.data,
+(newVal, oldVal) => {
+  model.value ={
+    ...JSON.parse(JSON.stringify(newVal)),
+    status: newVal.status !== 'draft',
+  };
+}
+);
+
+
 if (route.params.id){
-    model.value = store.state.surveys.find(
-        (s) => s.id === parseInt(route.params.id)
+  store.dispatch('getSurvey', route.params.id);
+}
 
-    );
+function onImageChoose (ev) {
+    const file = ev.target.files[0];
 
+    const reader = new FileReader();
+    reader.onload = () => {
+        // The field to send on backend and apply Validations
+        model.value.image = reader.result;
+
+        // The field to display the image here
+        model.value.image_url = reader.result;
+    }
+    reader.readAsDataURL(file);
 }
 
 function addQuestion(index){
@@ -153,14 +181,14 @@ function addQuestion(index){
         data: {},
     };
 
-    model.value.questions.splice(index, 0, newQuestion); 
+    model.value.questions.splice(index, 0, newQuestion);
 }
 
 function deleteQuestion(question){
     model.value.questions = model.value.questions.filter(
         (q) => q !== question
     );
-    
+
 }
 
 function questionChange(question){
@@ -173,7 +201,8 @@ function questionChange(question){
 }
 
 function saveSurvey(){
-    store.dispatch("saveSurvey", model.value). then(({ data }) => {
+
+    store.dispatch("saveSurvey", model.value).then(({ data }) => {
         router.push({
             name: "SurveyView",
             params: { id: data.data.id},

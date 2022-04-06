@@ -90,8 +90,6 @@
       <tr>
         <th>ID</th>
         <th>Institution Name</th>
-        <th>Street</th>
-        <th>Municipality</th>
         <th>Province</th>
         <th>Postal Code</th>
         <th colspan="2">Action</th>
@@ -102,8 +100,6 @@
       <tr v-for="hei in heis" :key="hei.id">
         <td>{{hei.id}}</td>
         <td>{{hei.institution_name}}</td>
-        <td>{{hei.street}}</td>
-        <td>{{hei.municipality}}</td>
         <td>{{hei.province}}</td>
         <td>{{hei.postal_code}}</td>
         <td>

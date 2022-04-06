@@ -12,4 +12,5 @@ class heiProfile extends Model
     protected $table = 'hei_profile';
 
     protected $fillable = ['user_id', 'institution_name', 'street','municipality', 'province', 'postal_code', 'institutional_telephone', 'institutional_fax_no', 'institutional_emailaddress', 'institutional_head', 'position', 'status'];
+    protected $perPage = 60;
 }

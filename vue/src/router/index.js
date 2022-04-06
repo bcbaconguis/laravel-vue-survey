@@ -6,7 +6,10 @@ import SurveyView from '../views/SurveyView.vue';
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import Dashboard from '../views/Dashboard.vue';
+import HEIs from '../views/HEIs.vue';
+import HEIsView from '../views/HEIs.vue';
 import store from "../store";
+
 
 const routes =[
     {
@@ -20,6 +23,9 @@ const routes =[
             {path: '/surveys', name:'Surveys', component:Surveys},
             {path: '/surveys/create', name:'SurveyCreate', component:SurveyView},
             {path: '/surveys/:id', name:'SurveyView', component:SurveyView},
+            {path: '/heis', name:'HEIs', component:HEIs},
+            {path: '/heis/create', name:'HEIsCreate', component:HEIsView},
+            {path: '/heis/create/:id', name:'HEIsView', component:HEIsView},
         ]
 
     },
@@ -55,3 +61,4 @@ router.beforeEach((to,from,next)=> {
 });
 
 export default router;
+

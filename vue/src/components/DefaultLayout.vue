@@ -14,15 +14,23 @@
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <img class="h-8 w-8" src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg" alt="Workflow" />
+              <img class="h-8 w-8" src="https://unifast.gov.ph/assets/img/logo/unifast-web-logo-2.png" alt="Workflow" />
             </div>
 
 
             <div class="hidden md:block">
               <div class="ml-10 flex items-baseline space-x-4">
-                <router-link v-for="item in navigation" :key="item.name" :to="item.to" active-class="bg-gray-900 text-white" :class="[this.$router.name === item.to.name ? '' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'px-3 py-2 rounded-md text-sm font-medium']">{{ item.name }}</router-link>
+                <router-link v-for="item in navigation" :key="item.name" :to="item.to" :class="[this.$router.name === item.to.name ? '' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'px-3 py-2 rounded-md text-sm font-medium']">{{ item.name }}</router-link>
+
               </div>
             </div>
+
+            <div class="dropdown dropdown-hover ml-5">
+            <label tabindex="0" class="btn-square text-gray-300 cursor-pointer">Manage</label>
+            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                <router-link v-for="manages in manage" :key="manages.name" :to="manages.to" :class="[this.$router.name === manages.to.name ? '' : 'text-black-500 hover:bg-gray-700 hover:text-white', 'px-3 py-2 rounded-md text-sm font-medium']">{{ manages.name }}</router-link>
+            </ul>
+          </div>
 
 
           </div>
@@ -101,6 +109,14 @@ import {useRouter} from 'vue-router'
 const navigation = [
   { name: 'Dashboard', to :{name: 'Dashboard'}},
   { name: 'Surveys', to :{name: 'Surveys'}},
+  { name: 'Generate Vouchers', to :{name: 'Surveys'}},
+
+]
+
+const manage =[
+  { name: 'HEIs Profile', to :{name: 'HEIs'}},
+  { name: 'Focal Persons', to :{name: 'HEIs'}},
+  { name: 'Regional Coordinators', to :{name: 'HEIs'}},
 ]
 
 export default {
@@ -130,8 +146,9 @@ export default {
       }
 
       return {
-      user: computed(()=>store.state.user.data), 
+      user: computed(()=>store.state.user.data),
       navigation,
+      manage,
       logout
     }
   },
